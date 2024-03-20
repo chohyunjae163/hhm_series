@@ -1,0 +1,2 @@
+- command prompt
+- need visual studio build tools - https://github.com/Data-Oriented-House/PortableBuildTools
