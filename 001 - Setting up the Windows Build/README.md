@@ -4,4 +4,4 @@
 
 
 bat file
--> @echo off: dont say what you do
+@echo off: dont say what you do
