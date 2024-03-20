@@ -5,9 +5,9 @@ The things I need
 - text editor
 
 bat file <br />
-@echo off: dont say what you do
-pushd : push directory <br />
-popd : pop directory <br />
+- @echo off: dont say what you do
+- pushd : push directory 
+- popd : pop directory
 
-cl compiler <br />
-/Zi -> debug info <br />
+cl compiler
+- /Zi -> debug info 
