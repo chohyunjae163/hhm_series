@@ -6,3 +6,8 @@ The things I need
 
 bat file <br />
 @echo off: dont say what you do
+pushd : push directory <br />
+popd : pop directory <br />
+
+cl compiler <br />
+/Zi -> debug info <br />
