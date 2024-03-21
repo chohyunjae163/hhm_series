@@ -1,4 +1,5 @@
 # hhm_series
-my attempt to follow all the HHM series, coding and taking notes for each video.
+My attempt to follow all the HHM series, coding and taking notes for each video.
+I will write a simple game betweenn videos time to time where I feel it is enought to create one.
 
-https://handmadehero.org/
+# HHM Link: https://handmadehero.org/
