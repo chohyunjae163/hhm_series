@@ -8,3 +8,5 @@ https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-stretchdibi
 - #### CreateDIBSection
   The CreateDIBSection function creates a DIB that applications can write to directly. The function gives you a pointer to the location of the bitmap bit values.
 https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createdibsection
+- #### DIB (Device-Independent Bitmaps)
+https://learn.microsoft.com/en-us/windows/win32/gdi/device-independent-bitmaps
