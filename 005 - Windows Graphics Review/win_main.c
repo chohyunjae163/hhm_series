@@ -56,6 +56,7 @@ Win32ResizeDIBSection(win32_offscreen_buffer* Buffer, int Width, int Height) {
 
   Buffer->Width = Width;
   Buffer->Height = Height;
+  Buffer->BytesPerPixel = 4;
 
   Buffer->Info.bmiHeader.biSize = sizeof(Buffer->Info.bmiHeader);
   Buffer->Info.bmiHeader.biWidth = Buffer->Width;
@@ -65,6 +66,7 @@ Win32ResizeDIBSection(win32_offscreen_buffer* Buffer, int Width, int Height) {
   Buffer->Info.bmiHeader.biCompression = BI_RGB;
 
   int BitmapMemorySize = (Buffer->Width * Buffer->Height) * Buffer->BytesPerPixel;
+  
   Buffer->Memory = VirtualAlloc (0, BitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
 
 
