@@ -95,10 +95,12 @@ internal void
 Win32DisplayBufferInWindow(HDC DeviceContext, int WindowWidth,int WindowHeight, 
   win32_offscreen_buffer Buffer,
   int X,int Y,int Width,int Height) {
+
+  //TODO : Aspect ratio correction
   StretchDIBits(
     DeviceContext,
-    0,0,Buffer.Width,Buffer.Height,
     0,0,WindowWidth,WindowHeight,
+    0,0,Buffer.Width,Buffer.Height,
     Buffer.Memory,
     &Buffer.Info,
     DIB_RGB_COLORS,
@@ -116,8 +118,7 @@ Win32MainWindowCallback(
 
   switch(Message) {
     case WM_SIZE:{
-      win32_window_dimension Dimension = Win32GetWindowDimension(Window);
-      Win32ResizeDIBSection(&GlobalBackBuffer,Dimension.Width,Dimension.Height);
+
       OutputDebugStringA("WM_SIZE\n");
     } break;
     case WM_DESTROY:{
@@ -162,6 +163,9 @@ WinMain(HINSTANCE Instance,
         LPSTR CommandLine,
         int ShowCode) {
   WNDCLASS WindowClass =  { 0 };
+
+  Win32ResizeDIBSection(&GlobalBackBuffer,1280,720);
+
   WindowClass.style = CS_HREDRAW | CS_VREDRAW;
   WindowClass.lpfnWndProc = Win32MainWindowCallback;
   WindowClass.hInstance = Instance;
@@ -211,6 +215,7 @@ WinMain(HINSTANCE Instance,
           Dimension.Width,
           Dimension.Height);
         ++XOffset;
+        ++YOffset;
       }
       
     } else {
