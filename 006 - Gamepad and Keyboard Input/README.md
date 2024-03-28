@@ -6,3 +6,6 @@ https://learn.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputgetst
 
 ### LoadLibrary
 https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya
+
+### Virtual Key
+https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
