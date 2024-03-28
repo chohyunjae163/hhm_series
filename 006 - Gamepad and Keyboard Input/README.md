@@ -3,3 +3,6 @@ https://learn.microsoft.com/en-us/windows/win32/xinput/getting-started-with-xinp
 
 ### XInputGetState
 https://learn.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputgetstate
+
+### LoadLibrary
+https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya
