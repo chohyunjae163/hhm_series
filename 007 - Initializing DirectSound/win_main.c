@@ -21,7 +21,7 @@ typedef struct {
   int BytesPerPixel;
 } win32_offscreen_buffer;
 
-global_variable int Running;
+global_variable int GlobalRunning;
 global_variable win32_offscreen_buffer GlobalBackBuffer;
 
 
@@ -35,7 +35,7 @@ typedef struct {
 typedef X_INPUT_GET_STATE(x_input_get_state);
 X_INPUT_GET_STATE(XInputGetStateStub)
 {
-  return (0);
+  return (ERROR_DEVICE_NOT_CONNECTED);
 }
 global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
 #define XInputGetState XInputGetState_
@@ -44,14 +44,19 @@ global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
 typedef X_INPUT_SET_STATE(x_input_set_state);
 X_INPUT_SET_STATE(XInputSetStateStub)
 {
-  return (0);
+  return (ERROR_DEVICE_NOT_CONNECTED);
 }
 global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
 #define XInputSetState XInputSetState_
 
 internal void
 Win32LoadXInput(void) {
-  HMODULE XInputLibrary = LoadLibraryA("xinput1_3.dll");
+  // TODO: test this on Windows 8
+  HMODULE XInputLibrary = LoadLibraryA("xinput1_4.dll");
+  if(!XInputLibrary){
+    XInputLibrary = LoadLibraryA("xinput1_3.dll");  
+  }
+  
 
   if(XInputLibrary){
     XInputGetState = (x_input_get_state *)GetProcAddress(XInputLibrary,"XInputGetState");
@@ -153,11 +158,11 @@ Win32MainWindowCallback(
       OutputDebugStringA("WM_SIZE\n");
     } break;
     case WM_DESTROY:{
-      Running = 0;
+      GlobalRunning = 0;
       OutputDebugStringA("WM_DESTROY\n");
     } break;
     case WM_CLOSE:{
-      Running = 0;
+      GlobalRunning = 0;
       OutputDebugStringA("WM_CLOSE\n");
     } break;
     case WM_ACTIVATEAPP: {
@@ -201,7 +206,10 @@ Win32MainWindowCallback(
           }
         }
       }
- 
+      BOOL AltKeyWasDown = ((LParam & (1 << 29)) != 0 );
+      if(VKCode == VK_F4 && AltKeyWasDown) {
+        GlobalRunning = 0;
+      }
     }break;
     case WM_PAINT: {
       PAINTSTRUCT Paint;
@@ -259,14 +267,14 @@ WinMain(HINSTANCE Instance,
       0 );
 
     if ( Window ) { 
-      Running = 1;
+      GlobalRunning = 1;
       int XOffset = 0;
       int YOffset = 0;
-      while ( Running ) {
+      while ( GlobalRunning ) {
         MSG Message;
         while(PeekMessage( &Message, 0, 0,0,PM_REMOVE )){
           if(Message.message == WM_QUIT) {
-            Running = 0;
+            GlobalRunning = 0;
           }
 
           TranslateMessage(&Message);
