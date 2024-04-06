@@ -15,7 +15,6 @@ Establishes the cooperative level for this instance of the device. The cooperati
 ### IDirectSoundBuffer::SetFormat
 This method sets the format of the primary sound buffer for the application. Whenever this application has the input focus, DirectSound will set the primary buffer to the specified format.
 
-
 ## MISC
 ### System Error Codes
 https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
