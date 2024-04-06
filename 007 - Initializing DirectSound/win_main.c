@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <stdint.h>
 #include <xinput.h>
+#include <dsound.h>
 
 #define internal static
 #define local_persist static
@@ -10,7 +11,8 @@
 typedef uint8_t uint8;
 typedef uint32_t uint32;
 typedef int16_t int16;
-
+typedef int32_t bool32;
+typedef int32_t int32;
 
 typedef struct {
   BITMAPINFO Info;
@@ -49,6 +51,10 @@ X_INPUT_SET_STATE(XInputSetStateStub)
 global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
 #define XInputSetState XInputSetState_
 
+#define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter)
+typedef DIRECT_SOUND_CREATE(direct_sound_create);
+
+
 internal void
 Win32LoadXInput(void) {
   // TODO: test this on Windows 8
@@ -74,6 +80,60 @@ Win32GetWindowDimension(HWND Window) {
   Result.Height = ClientRect.bottom - ClientRect.top;
 
   return (Result);
+}
+
+internal void
+Win32InitDSound(HWND Window, int32 SamplesPerSecond, int32 BufferSize) {
+  //NOTE: Load the library
+  HMODULE DSoundLibrary = LoadLibraryA("dsound.dll");
+
+  if(DSoundLibrary) {
+    direct_sound_create* DirectSoundCrate = (direct_sound_create*)GetProcAddress(DSoundLibrary,"DirectSoundCreate");
+
+    LPDIRECTSOUND DirectSound;
+    if(DirectSoundCrate && SUCCEEDED(DirectSoundCrate(0,&DirectSound,0))) {
+      WAVEFORMATEX WaveFormat = {};
+      WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
+      WaveFormat.nChannels = 2;
+      WaveFormat.nSamplesPerSec = SamplesPerSecond;
+      WaveFormat.wBitsPerSample = 16;
+      WaveFormat.nBlockAlign = (WaveFormat.nChannels * WaveFormat.wBitsPerSample) / 8;
+      WaveFormat.nAvgBytesPerSec = WaveFormat.nSamplesPerSec * WaveFormat.nBlockAlign;
+      WaveFormat.cbSize = 0;
+      if(SUCCEEDED(IDirectSound_SetCooperativeLevel(DirectSound,Window,DSSCL_PRIORITY))) {
+        DSBUFFERDESC BufferDescription = { } ;
+        BufferDescription.dwSize = sizeof(BufferDescription);
+        BufferDescription.dwFlags = DSBCAPS_PRIMARYBUFFER;
+        BufferDescription.dwBufferBytes = 0;
+        LPDIRECTSOUNDBUFFER PrimaryBuffer;
+        if(SUCCEEDED(IDirectSound_CreateSoundBuffer(DirectSound,&BufferDescription,&PrimaryBuffer,0))) {
+
+          if(SUCCEEDED(IDirectSoundBuffer_SetFormat(PrimaryBuffer,&WaveFormat))){
+
+          } else {
+            //TODO : diagnostic
+          }
+        } else {
+          //TODO : diagnostic
+        }
+
+      } else {
+        //TODO : diagnostic
+      }
+      //Note: Create a secondary buffer
+      DSBUFFERDESC BufferDescription = { } ;
+      BufferDescription.dwSize = sizeof(BufferDescription);
+      BufferDescription.dwFlags = 0;
+      BufferDescription.dwBufferBytes = 0;
+      BufferDescription.dwBufferBytes = BufferSize;
+      LPDIRECTSOUNDBUFFER SecondaryBuffer;
+      if(SUCCEEDED(IDirectSound_CreateSoundBuffer(DirectSound,&BufferDescription,&SecondaryBuffer,0))){
+
+      }                 
+    } else {
+      //TODO : diagnostic
+    }
+  }
 }
 
 internal void
@@ -173,8 +233,8 @@ Win32MainWindowCallback(
     case WM_KEYDOWN:
     case WM_KEYUP: {
       uint32 VKCode = WParam;
-      BOOL WasDown = ((LParam & (1 << 30)) != 0);
-      BOOL IsDown = ((LParam & (1 << 31)) == 0);
+      bool32 WasDown = LParam & (1 << 30);
+      bool32 IsDown = LParam & (1 << 31);
       if(WasDown != IsDown) {
         if(VKCode == 'W'){
   
@@ -206,7 +266,7 @@ Win32MainWindowCallback(
           }
         }
       }
-      BOOL AltKeyWasDown = ((LParam & (1 << 29)) != 0 );
+      bool32 AltKeyWasDown = (LParam & (1 << 29));
       if(VKCode == VK_F4 && AltKeyWasDown) {
         GlobalRunning = 0;
       }
@@ -239,7 +299,9 @@ WinMain(HINSTANCE Instance,
         HINSTANCE PrevInstance,
         LPSTR CommandLine,
         int ShowCode) {
+
   Win32LoadXInput();
+  
   WNDCLASS WindowClass =  { 0 };
 
   Win32ResizeDIBSection(&GlobalBackBuffer,1280,720);
@@ -270,6 +332,7 @@ WinMain(HINSTANCE Instance,
       GlobalRunning = 1;
       int XOffset = 0;
       int YOffset = 0;
+      Win32InitDSound(Window,48000,48000*sizeof(int16)*2);
       while ( GlobalRunning ) {
         MSG Message;
         while(PeekMessage( &Message, 0, 0,0,PM_REMOVE )){
@@ -288,18 +351,18 @@ WinMain(HINSTANCE Instance,
           if( XInputGetState( ControllerIndex, &ControllerState ) == ERROR_SUCCESS){
             //note : the controller is plugged in
             XINPUT_GAMEPAD* Pad = &ControllerState.Gamepad;
-            BOOL Up = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_UP );
-            BOOL Down = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN );
-            BOOL Left = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT );
-            BOOL Right = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT );
-            BOOL Start = ( Pad->wButtons & XINPUT_GAMEPAD_START );
-            BOOL Back = ( Pad->wButtons & XINPUT_GAMEPAD_BACK );
-            BOOL LeftShoulder = ( Pad->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER );
-            BOOL RightShoulder = ( Pad->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER );
-            BOOL AButton = ( Pad->wButtons & XINPUT_GAMEPAD_A );
-            BOOL BButton = ( Pad->wButtons & XINPUT_GAMEPAD_B );
-            BOOL XButton = ( Pad->wButtons & XINPUT_GAMEPAD_X );
-            BOOL YButton = ( Pad->wButtons & XINPUT_GAMEPAD_Y );
+            bool32 Up = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_UP );
+            bool32 Down = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN );
+            bool32 Left = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT );
+            bool32 Right = ( Pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT );
+            bool32 Start = ( Pad->wButtons & XINPUT_GAMEPAD_START );
+            bool32 Back = ( Pad->wButtons & XINPUT_GAMEPAD_BACK );
+            bool32 LeftShoulder = ( Pad->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER );
+            bool32 RightShoulder = ( Pad->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER );
+            bool32 AButton = ( Pad->wButtons & XINPUT_GAMEPAD_A );
+            bool32 BButton = ( Pad->wButtons & XINPUT_GAMEPAD_B );
+            bool32 XButton = ( Pad->wButtons & XINPUT_GAMEPAD_X );
+            bool32 YButton = ( Pad->wButtons & XINPUT_GAMEPAD_Y );
 
             int16 StickX = Pad->sThumbLX;
             int16 StickY = Pad->sThumbLY;
@@ -336,5 +399,6 @@ WinMain(HINSTANCE Instance,
 
   
     
-  return(0);  }
+  return(0);  
+}
 
