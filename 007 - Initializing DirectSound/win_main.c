@@ -109,7 +109,7 @@ Win32InitDSound(HWND Window, int32 SamplesPerSecond, int32 BufferSize) {
         if(SUCCEEDED(IDirectSound_CreateSoundBuffer(DirectSound,&BufferDescription,&PrimaryBuffer,0))) {
 
           if(SUCCEEDED(IDirectSoundBuffer_SetFormat(PrimaryBuffer,&WaveFormat))){
-
+            OutputDebugStringA("PrimaryBuffer format was set!\n");
           } else {
             //TODO : diagnostic
           }
@@ -124,11 +124,11 @@ Win32InitDSound(HWND Window, int32 SamplesPerSecond, int32 BufferSize) {
       DSBUFFERDESC BufferDescription = { } ;
       BufferDescription.dwSize = sizeof(BufferDescription);
       BufferDescription.dwFlags = 0;
-      BufferDescription.dwBufferBytes = 0;
       BufferDescription.dwBufferBytes = BufferSize;
+      BufferDescription.lpwfxFormat = &WaveFormat;
       LPDIRECTSOUNDBUFFER SecondaryBuffer;
       if(SUCCEEDED(IDirectSound_CreateSoundBuffer(DirectSound,&BufferDescription,&SecondaryBuffer,0))){
-
+        OutputDebugStringA("SecondaryBuffer was created successfully!\n");
       }                 
     } else {
       //TODO : diagnostic
