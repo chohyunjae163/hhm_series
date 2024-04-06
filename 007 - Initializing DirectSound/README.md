@@ -1,6 +1,6 @@
 
 ## DIRECTSOUND API
-https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416960(v=vs.85)
+https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee416960(v=vs.85) <br>
 [The feature associated with this page, DirectSound, is a legacy feature. It has been superseded by WASAPI and Audio Graphs. Media Casting have been optimized for Windows 10 and Windows 11. Microsoft strongly recommends that new code use Media Casting instead of DirectSound, when possible. Microsoft suggests that existing code that uses the legacy APIs be rewritten to use the new APIs if possible.]
 
 ### IDirectSound::CreateSoundBuffer
